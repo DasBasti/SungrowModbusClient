@@ -9,10 +9,9 @@ The modbus map was generated from the official sungrow modbus specification and 
 
 ## Getting started
 ```python
-import SungrowModbusClient
-import sungrow
+from SungrowModbusClient import Client, sungrow_register
 
-c = SungrowModbusClient.Client(sungrow.sungrow_registers, "192.168.0.120", 502)
+c = Client(sungrow_register.regmap, "192.168.0.120", 502)
 
 c.load_register()
 

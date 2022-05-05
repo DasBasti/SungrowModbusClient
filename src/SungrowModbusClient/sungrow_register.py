@@ -14,7 +14,7 @@
 # [description, register, type, format]
 #Address of 3x type is read-only register, supporting the cmdcode inquiry of 0x04.
 
-sungrow_registers = [
+regmap = [
   ['4990 ~ 4999 - Serial number',4990,'STR16','ENUM'],
   ['5001 - Nominal active power',5001,'U16','FIX1'], #0.1kWh
   ['5003 - Daily power yields',5003,'U16','FIX1'], #0.1kWh
