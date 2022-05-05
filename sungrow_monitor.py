@@ -35,9 +35,9 @@ from threading import Thread
 MIN_SIGNED   = -2147483648
 MAX_UNSIGNED =  4294967295
 
-print "Load config %s" % config.model
-print "Timezone is %s" % config.timezone
-print "The current time is %s" % (str(datetime.datetime.now(timezone(config.timezone))).partition('.')[0])
+print("Load config %s" % config.model)
+print("Timezone is %s" % config.timezone)
+print("The current time is %s" % (str(datetime.datetime.now(timezone(config.timezone))).partition('.')[0]))
 
 # modbus datatypes and register lengths
 sungrow_moddatatype = {
@@ -53,7 +53,7 @@ sungrow_moddatatype = {
 modmap_file = "modbus-" + config.model
 modmap = __import__(modmap_file)
 
-print "Load ModbusTcpClient"
+print("Load ModbusTcpClient")
 
 client = ModbusTcpClient(config.inverter_ip, 
                          timeout=config.timeout,
@@ -97,7 +97,7 @@ def load_register(registers):
     except:
       thisdate = str(datetime.datetime.now(timezone(config.timezone))).partition('.')[0]
       thiserrormessage = thisdate + ': Connection not possible. Check settings or connection.'
-      print thiserrormessage
+      print(thiserrormessage)
       return
     
     # 32bit double word data is encoded in Endian.Little, all byte data is in Endian.Big
@@ -113,9 +113,9 @@ def load_register(registers):
     elif data_type == 'U64':
       interpreted = message.decode_64bit_uint()
     elif data_type == 'STR16':
-      interpreted = message.decode_string(16).rstrip('\x00')
+      interpreted = message.decode_string(16).rstrip(b'\x00')
     elif data_type == 'STR32':
-      interpreted = message.decode_string(32).rstrip('\x00')
+      interpreted = message.decode_string(32).rstrip(b'\x00')
     elif data_type == 'S16':
       interpreted = message.decode_16bit_int()
     elif data_type == 'U16':
@@ -169,35 +169,35 @@ def main():
     if len(inverter) > 0: #only continue if we get a successful read
       if inverter["5031 - Total active power"] <90000: #sometimes the modbus give back a weird value
         power_gen.append(inverter["5031 - Total active power"])
-        print "Total active power = %s" % inverter["5031 - Total active power"]
+        print("Total active power = %s" % inverter["5031 - Total active power"])
       else:
-        print "Didn't get a read for Daily Power"
+        print("Didn't get a read for Daily Power")
       if inverter["5011 - MPPT 1 voltage"] <9000: #sometimes the modbus give back a weird value
         voltage_1.append(inverter["5011 - MPPT 1 voltage"])
-        print "MPPT 1 Voltage = %s" % inverter["5011 - MPPT 1 voltage"]
+        print("MPPT 1 Voltage = %s" % inverter["5011 - MPPT 1 voltage"])
       else:
-        print "Didn't get a read for MPPT 1 Voltage" 
+        print("Didn't get a read for MPPT 1 Voltage") 
       if inverter["5013 - MPPT 2 voltage"] <9000: #sometimes the modbus give back a weird value
         voltage_2.append(inverter["5013 - MPPT 2 voltage"])
-        print "MPPT 2 Voltage = %s" % inverter["5013 - MPPT 2 voltage"]
+        print("MPPT 2 Voltage = %s" % inverter["5013 - MPPT 2 voltage"])
       else:
-        print "Didn't get a read for MPPT 2 Voltage"
+        print("Didn't get a read for MPPT 2 Voltage")
       #if config has elected to upload consumption data then we should store those registers if they are enabled
       if upload:
         if inverter["5097 - Daily import energy"] <50000: #sometimes the modbus give back a weird value
           power_con.append(inverter["5097 - Daily import energy"])
-          print "Daily import energy = %s" % inverter["5097 - Daily import energy"]
+          print("Daily import energy = %s" % inverter["5097 - Daily import energy"])
         else: 
-          print "Didn't get a read for Daily Import Energy"
+          print("Didn't get a read for Daily Import Energy")
       # we are done with the connection for now so close it
     client.close()
   except Exception as err:
-    print "[ERROR] %s" % err
+    print("[ERROR] %s" % err)
     client.close()
   #increment counter
   count+=1
   if count >= (60/config.scan_interval) * config.upload_interval and len(power_gen) >= 1 : #possibly spawn thread here and instead make counter be every 5 mins
-    print "%d individual observations were made (out of %d attempts) over the last %d minutes averaging %d Watts" % (len(power_gen), count, count*config.scan_interval/60,sum(power_gen)/len(power_gen))
+    print("%d individual observations were made (out of %d attempts) over the last %d minutes averaging %d Watts" % (len(power_gen), count, count*config.scan_interval/60,sum(power_gen)/len(power_gen)))
     count = 0
     now = datetime.datetime.now(timezone(config.timezone))
     try: 
@@ -226,13 +226,13 @@ def main():
       }
       response = requests.request("POST", url=config.pv_url, headers=headers, params=querystring)
       if response.status_code != requests.codes.ok:
-          raise StandardError(response.text)
+          raise Exception(response.text)
       else:
-          print "Successfully posted to %s" % config.pv_url
+          print("Successfully posted to %s" % config.pv_url)
     except Exception as err:
-      print "[ERROR] %s" % err
+      print("[ERROR] %s" % err)
   #sleep until next iteration
-  print "Loop %d of %d complete. Sleeping %ds...." % (count, (60/config.scan_interval)*config.upload_interval, config.scan_interval)
+  print("Loop %d of %d complete. Sleeping %ds...." % (count, (60/config.scan_interval)*config.upload_interval, config.scan_interval))
 
 loop_timer(config.scan_interval, main)
 
