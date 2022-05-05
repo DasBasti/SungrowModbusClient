@@ -50,5 +50,3 @@ sungrow_registers = [
   ['5146 - Negative voltage to ground',5146,'S16','FIX1'], #0.1V
   ['5148 - Grid frequency',5148,'U16','FIX2'] #0.01Hz
   ]
-
-scan = "{}"
